@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 export default function Hero() {
   const [text, setText] = useState('');
+  const [index, setIndex] = useState(0);
   const roles = [
     'Full Stack Developer',
     'AI Engineer',
