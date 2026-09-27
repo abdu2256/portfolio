@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react';
 
 export default function Hero() {
   const [text, setText] = useState('');
-  const [index, setIndex] = useState(0);
-  const roles = [
-    'Full Stack Developer',
-    'AI Engineer',
-    'MERN Stack Developer',
-    'LLM Integration Expert',
-  ];
 
   useEffect(() => {
+    const roles = [
+      'Full Stack Developer',
+      'AI Engineer',
+      'MERN Stack Developer',
+      'LLM Integration Expert',
+    ];
+
     let charIndex = 0;
     let roleIndex = 0;
     let deleting = false;
