@@ -3,13 +3,13 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "https://abdullah-basit-portfolio.vercel.app" }));
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
   console.log('Request received!');
   console.log('GROQ KEY:', process.env.GROQ_KEY ? 'Found' : 'NOT FOUND');
-  
+
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -19,7 +19,7 @@ app.post('/api/chat', async (req, res) => {
       },
       body: JSON.stringify(req.body)
     });
-    
+
     console.log('Groq status:', response.status);
     const data = await response.json();
     console.log('Groq response:', JSON.stringify(data).slice(0, 200));
@@ -30,4 +30,5 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-app.listen(4000, () => console.log('✅ Proxy running on port 4000'));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`✅ Proxy running on port ${PORT}`));
