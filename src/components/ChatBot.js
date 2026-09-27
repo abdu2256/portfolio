@@ -50,7 +50,7 @@ export default function ChatBot() {
     setLoading(true);
 
     try {
-    const response = await fetch('http://localhost:4000/api/chat', {
+    const response = await fetch('https://portfolio-production-7aad.up.railway.app/api/chat', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
