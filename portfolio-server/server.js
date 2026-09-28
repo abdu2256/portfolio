@@ -6,12 +6,33 @@ const app = express();
 app.use(cors({ origin: "https://portfolio-tawny-eight-66.vercel.app" }));
 app.use(express.json());
 
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+// Can be overridden from Railway Variables (GROQ_MODEL) without a code push
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 console.log('--- Startup check ---');
 console.log('GROQ_KEY at startup:', process.env.GROQ_KEY ? 'Found' : 'NOT FOUND');
 console.log('Model:', GROQ_MODEL);
 console.log('---------------------');
+
+// TEMPORARY diagnostic route: lists the models this API key can actually use.
+// Open https://<your-railway-url>/api/models in the browser. Remove once chat works.
+app.get('/api/models', async (req, res) => {
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { 'Authorization': `Bearer ${process.env.GROQ_KEY}` }
+    });
+    const data = await response.json();
+    if (data && Array.isArray(data.data)) {
+      return res.status(response.status).json({
+        count: data.data.length,
+        models: data.data.map(m => m.id)
+      });
+    }
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.post('/api/chat', async (req, res) => {
   console.log('Request received!');
