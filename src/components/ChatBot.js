@@ -1,3 +1,4 @@
+import ReactMarkdown from 'react-markdown';
 import { useState, useRef, useEffect } from 'react';
 
 const SYSTEM_CONTEXT = `You are Abdullah Basit's portfolio assistant. Answer questions about Abdullah professionally and concisely.
@@ -50,24 +51,24 @@ export default function ChatBot() {
     setLoading(true);
 
     try {
-    const response = await fetch('https://portfolio-production-7aad.up.railway.app/api/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-   model: "llama-3.3-70b-versatile",
-    max_tokens: 300,
-    messages: [
-      { role: 'system', content: SYSTEM_CONTEXT },
-      ...newMessages.map(m => ({ role: m.role, content: m.content }))
-    ]
-  })
-});
+      const response = await fetch('https://portfolio-production-7aad.up.railway.app/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          max_tokens: 300,
+          messages: [
+            { role: 'system', content: SYSTEM_CONTEXT },
+            ...newMessages.map(m => ({ role: m.role, content: m.content }))
+          ]
+        })
+      });
 
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't respond right now!";
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-      
-    } catch (err) { console.error('Fetch error:', err);
+
+    } catch (err) {
+      console.error('Fetch error:', err);
       setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting. Please email Abdullah directly at khanakabdullah188@gmail.com!" }]);
     }
     setLoading(false);
@@ -173,7 +174,7 @@ export default function ChatBot() {
                     justifyContent: 'center', fontSize: '12px'
                   }}>🤖</div>
                 )}
-                <div style={{
+                <div className="chat-msg" style={{
                   maxWidth: '78%',
                   padding: '10px 14px',
                   borderRadius: msg.role === 'user'
@@ -187,7 +188,7 @@ export default function ChatBot() {
                     : 'none',
                   color: 'white', fontSize: '13px', lineHeight: '1.5'
                 }}>
-                  {msg.content}
+                  {msg.role === 'assistant' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : msg.content}
                 </div>
               </div>
             ))}
@@ -293,6 +294,13 @@ export default function ChatBot() {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-6px); }
         }
+        .chat-msg p { margin: 0 0 8px; }
+        .chat-msg p:last-child { margin-bottom: 0; }
+        .chat-msg strong { color: white; }
+        .chat-msg ul, .chat-msg ol { padding-left: 18px; margin: 4px 0; }
+        .chat-msg table { border-collapse: collapse; width: 100%; font-size: 12px; margin: 6px 0; }
+        .chat-msg td, .chat-msg th { border: 1px solid rgba(255,255,255,0.1); padding: 4px 6px; }
+        .chat-msg code { background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 4px; }
       `}</style>
     </>
   );
