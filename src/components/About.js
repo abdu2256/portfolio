@@ -10,11 +10,20 @@ export default function About() {
             borderRadius: '24px',
             background: 'linear-gradient(135deg, #6366f1, #a855f7)',
             display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: '120px',
+            justifyContent: 'center',
             boxShadow: '0 20px 60px rgba(99,102,241,0.3)',
-            margin: '0 auto'
+            margin: '0 auto',
+            overflow: 'hidden'
           }}>
-            👨‍💻
+            <img
+              src="/profile.jpg"
+              alt="Abdullah Basit"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
           </div>
           {/* Floating badge */}
           <div style={{
