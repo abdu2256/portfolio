@@ -1,18 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { projects } from '../data/projects';
 
 export default function Projects() {
   const [showAll, setShowAll] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const displayed = showAll ? projects : projects.slice(0, 6);
 
+  useEffect(() => {
+    const checkSize = () => setIsMobile(window.innerWidth <= 768);
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
+
   return (
-    <section id="projects" style={{ padding: '100px 40px' }}>
+    <section id="projects" style={{ padding: isMobile ? '70px 20px' : '100px 40px' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>
           <div style={{ color: '#818cf8', fontSize: '13px', fontWeight: '700', letterSpacing: '2px', marginBottom: '12px' }}>
             MY WORK
           </div>
-          <h2 style={{ fontSize: '42px', fontWeight: '800', color: 'white', margin: 0 }}>
+          <h2 style={{ fontSize: isMobile ? '30px' : '42px', fontWeight: '800', color: 'white', margin: 0 }}>
             Featured{' '}
             <span style={{
               background: 'linear-gradient(135deg, #6366f1, #a855f7)',
@@ -23,7 +31,7 @@ export default function Projects() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '20px'
         }}>
           {displayed.map(project => (
@@ -32,7 +40,8 @@ export default function Projects() {
               border: '1px solid rgba(255,255,255,0.07)',
               borderRadius: '20px', padding: '28px',
               transition: 'all 0.3s', cursor: 'pointer',
-              position: 'relative', overflow: 'hidden'
+              position: 'relative', overflow: 'hidden',
+              boxSizing: 'border-box'
             }}
               onMouseEnter={e => {
                 e.currentTarget.style.border = `1px solid ${project.color}40`;
@@ -88,7 +97,7 @@ export default function Projects() {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <a href={project.github} target="_blank" rel="noreferrer" style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
                   padding: '8px 16px',
