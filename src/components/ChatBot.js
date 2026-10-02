@@ -1,3 +1,4 @@
+import remarkGfm from 'remark-gfm';
 import ReactMarkdown from 'react-markdown';
 import { useState, useRef, useEffect } from 'react';
 
@@ -25,7 +26,7 @@ Skills: MERN Stack, React, Node.js, Python, PostgreSQL, MongoDB, SQLite, LangCha
 
 Experience: RF & Drive Test Intern at TalkPool LCC (Huawei Projects) - April to June 2026
 
-Always be helpful, professional and encourage visitors to hire or contact Abdullah.`;
+Always be helpful, professional and encourage visitors to hire or contact Abdullah. When listing projects or multiple items, use simple bullet points instead of markdown tables, since the chat window is narrow.`;
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
@@ -111,8 +112,13 @@ export default function ChatBot() {
       {/* Chat Window */}
       {open && (
         <div style={{
-          position: 'fixed', bottom: '100px', right: '30px',
-          width: '360px', height: '500px',
+          position: 'fixed',
+          bottom: '100px', right: '30px',
+          left: 'auto',
+          width: '360px',
+          maxWidth: 'calc(100vw - 40px)',
+          height: '500px',
+          maxHeight: 'calc(100vh - 140px)',
           background: '#0f0f1a',
           border: '1px solid rgba(99,102,241,0.3)',
           borderRadius: '20px',
@@ -188,7 +194,9 @@ export default function ChatBot() {
                     : 'none',
                   color: 'white', fontSize: '13px', lineHeight: '1.5'
                 }}>
-                  {msg.role === 'assistant' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : msg.content}
+                  {msg.role === 'assistant'
+                    ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    : msg.content}
                 </div>
               </div>
             ))}
