@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors({ origin: "https://portfolio-tawny-eight-66.vercel.app" }));
+app.use(cors({ origin: "https://abdullahbasit.vercel.app" }));
 app.use(express.json());
 
 // Can be overridden from Railway Variables (GROQ_MODEL) without a code push
