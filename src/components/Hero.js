@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 
 export default function Hero() {
   const [text, setText] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkSize = () => setIsMobile(window.innerWidth <= 768);
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
 
   useEffect(() => {
     const roles = [
@@ -46,7 +54,8 @@ export default function Hero() {
       minHeight: '100vh',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative', overflow: 'hidden',
-      padding: '0 40px'
+      padding: isMobile ? '110px 20px 60px' : '0 40px',
+      boxSizing: 'border-box'
     }}>
       {/* Background orbs */}
       {[
@@ -83,7 +92,7 @@ export default function Hero() {
 
         {/* Name */}
         <h1 style={{
-          fontSize: '72px', fontWeight: '900',
+          fontSize: isMobile ? '48px' : '72px', fontWeight: '900',
           margin: '0 0 16px', lineHeight: '1.1',
           color: 'white'
         }}>
@@ -96,7 +105,7 @@ export default function Hero() {
 
         {/* Typing role */}
         <div style={{
-          fontSize: '28px', fontWeight: '600',
+          fontSize: isMobile ? '22px' : '28px', fontWeight: '600',
           color: 'rgba(255,255,255,0.7)',
           marginBottom: '24px', height: '40px'
         }}>
