@@ -17,7 +17,7 @@ export const projects = [
     tech: ["Node.js", "React.js", "MongoDB", "Claude API", "GPT-4o", "Twilio", "JWT"],
     color: "#a855f7",
     emoji: "🤖",
-    github: "https://github.com/abdu2256",
+    github: "https://github.com/abdu2256/autoreply-ai-saas",
     live: null,
     featured: true
   },
@@ -50,7 +50,7 @@ export const projects = [
     tech: ["Node.js", "Express.js", "MongoDB", "React.js", "JWT", "Mongoose"],
     color: "#f59e0b",
     emoji: "🎓",
-    github: "https://github.com/abdu2256",
+    github: "https://github.com/abdu2256/University-Portal",
     live: null,
     featured: false
   },
@@ -61,7 +61,7 @@ export const projects = [
     tech: ["React.js", "Recharts", "Node.js", "MongoDB", "REST API"],
     color: "#06b6d4",
     emoji: "📊",
-    github: "https://github.com/abdu2256",
+    github: "https://github.com/abdu2256/Talkpool-KPI-Dashboard-",
     live: null,
     featured: false
   },
