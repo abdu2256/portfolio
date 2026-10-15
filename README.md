@@ -31,7 +31,16 @@ Built with **React 19**, **Three.js (WebGL)**, **Framer Motion**, **Tailwind CSS
    - Serverless endpoint supporting Groq (`llama-3.3-70b-versatile`) and Gemini Flash with an embedded knowledge engine fallback so it never 500s or returns empty answers.
 
 ---
+## Screenshots
+1. Hero Section
+   <img width="1907" height="912" alt="image" src="https://github.com/user-attachments/assets/3b6c7d7c-936e-41fa-b110-92407d568436" />
+2. Projects Grid
+   <img width="1911" height="912" alt="image" src="https://github.com/user-attachments/assets/f6f77235-3bec-4b98-8754-02f611184515" />
+<img width="1912" height="911" alt="image" src="https://github.com/user-attachments/assets/ef9523ef-cb11-439c-8c36-1ec3ed7ec7ca" />
+3. AI Chatbot && Contact
+   <img width="1911" height="912" alt="image" src="https://github.com/user-attachments/assets/ac0b11a2-fac9-46ea-8a23-9197ed6adf3f" />
 
+   
 ## 🚀 How to Push to GitHub & Deploy on Vercel
 
 ### Step 1: Download & Extract the Code
