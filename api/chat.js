@@ -1,32 +1,104 @@
-// Vercel Serverless Function — replaces the Railway backend
-// Lives at: /api/chat.js (project root, NOT inside src/)
-// Vercel auto-detects anything in /api as a serverless endpoint.
-
-const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+// Vercel Serverless Function: /api/chat
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 module.exports = async (req, res) => {
-  // Allow only POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_KEY}`
-      },
-      body: JSON.stringify({ ...req.body, model: GROQ_MODEL })
-    });
+  const groqKey = (process.env.GROQ_KEY || '').trim();
+  const geminiKey = (process.env.GEMINI_API_KEY || '').trim();
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.log('Groq error:', JSON.stringify(data).slice(0, 300));
+  try {
+    // 1. Try Groq if valid key is configured
+    if (groqKey && groqKey.startsWith('gsk_')) {
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${groqKey}`
+          },
+          body: JSON.stringify({ ...req.body, model: GROQ_MODEL })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.choices?.[0]?.message?.content) {
+            return res.status(200).json(data);
+          }
+        }
+      } catch (_) {
+        // Fall through to backup
+      }
     }
-    res.status(response.status).json(data);
+
+    // 2. Try Gemini if valid key is configured
+    if (geminiKey && geminiKey.length > 20 && !geminiKey.includes('placeholder')) {
+      try {
+        const systemMsg = req.body?.messages?.find(m => m.role === 'system')?.content || '';
+        const userMsgs = (req.body?.messages || []).filter(m => m.role !== 'system');
+        const lastMsg = userMsgs[userMsgs.length - 1]?.content || 'Introduce yourself';
+
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: systemMsg ? { parts: [{ text: systemMsg }] } : undefined,
+              contents: [{ role: 'user', parts: [{ text: lastMsg }] }]
+            })
+          }
+        );
+
+        if (geminiRes.ok) {
+          const geminiData = await geminiRes.json();
+          const replyText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) {
+            return res.json({
+              choices: [{
+                message: {
+                  role: 'assistant',
+                  content: replyText
+                }
+              }]
+            });
+          }
+        }
+      } catch (_) {
+        // Fall through to local knowledge engine
+      }
+    }
+
+    // 3. Resilient In-Memory Knowledge Engine for Abdullah Basit
+    const userMsgs = (req.body?.messages || []).filter(m => m.role === 'user');
+    const latestQuestion = (userMsgs[userMsgs.length - 1]?.content || '').toLowerCase();
+
+    let reply = "Hello! I am Abdullah's portfolio assistant. He is a Full Stack Developer & AI Engineer based in Islamabad, Pakistan. How can I help you learn more about his work?";
+
+    if (latestQuestion.includes('project') || latestQuestion.includes('work') || latestQuestion.includes('portfolio') || latestQuestion.includes('built')) {
+      reply = "Abdullah has built several production-grade systems:\n\n1. **University Management Portal**: CUOnline-style portal with 25+ REST endpoints, MongoDB, Express, and role-based access for Students, Faculty, and Admins.\n2. **AI Interview Coach**: AI-powered mock interview system with speech-to-text, audio analysis, and local Ollama inference.\n3. **RAG PDF Chatbot**: Local document Q&A engine using Python, FastAPI, LangChain, and ChromaDB vector store.\n4. **AI Omnichannel Auto-Reply SaaS**: Dual-model confidence routing between Claude 3.5 and GPT-4o for WhatsApp, Slack, and Email support.\n5. **Hostel & Clinic Management Suite**: Offline-first cross-platform desktop ERP built with Electron.js, React, and encrypted SQLite.\n6. **TalkPool LTE KPI Dashboard**: Telecommunications drive-test analytics visualizer built with React and Recharts.\n7. **Skin Disease Detection (FYP)**: Medical image classification using deep Convolutional Neural Networks (CNN) with TensorFlow/Keras and OpenCV.";
+    } else if (latestQuestion.includes('tech') || latestQuestion.includes('stack') || latestQuestion.includes('skill') || latestQuestion.includes('language') || latestQuestion.includes('framework')) {
+      reply = "Here is a summary of Abdullah's technical stack:\n\n- **Frontend**: React.js, Tailwind CSS, JavaScript (ES6+), TypeScript, Electron.js, HTML5/CSS3\n- **Backend**: Node.js, Express.js, FastAPI, RESTful APIs, JWT, WebSockets\n- **Python & Data**: Python, TensorFlow, Keras, OpenCV, NumPy, Pandas\n- **AI & LLMs**: LangChain, Ollama (Local Models), ChromaDB (Vector Store), Claude API, OpenAI GPT-4o, RAG Architectures\n- **Databases**: PostgreSQL, MongoDB (Mongoose), SQLite\n- **DevOps**: Git, GitHub, Linux / Bash, Vercel, Postman";
+    } else if (latestQuestion.includes('hire') || latestQuestion.includes('available') || latestQuestion.includes('job') || latestQuestion.includes('opportunity') || latestQuestion.includes('interview')) {
+      reply = "Yes! Abdullah is actively available for:\n- **Full-time Software Engineering & Full Stack Developer roles**\n- **AI & RAG Systems Engineering positions**\n- **Freelance & Contract AI automation projects**\n\nYou can reach him directly at **khanakabdullah188@gmail.com** or **+92 331 555 2232**.";
+    } else if (latestQuestion.includes('contact') || latestQuestion.includes('email') || latestQuestion.includes('phone') || latestQuestion.includes('reach') || latestQuestion.includes('social') || latestQuestion.includes('github') || latestQuestion.includes('linkedin')) {
+      reply = "You can contact Abdullah via:\n\n- **Email**: [khanakabdullah188@gmail.com](mailto:khanakabdullah188@gmail.com)\n- **Phone**: +92 331 555 2232\n- **LinkedIn**: [linkedin.com/in/abdullah-khan-ak-4275292a6](https://linkedin.com/in/abdullah-khan-ak-4275292a6)\n- **GitHub**: [github.com/abdu2256](https://github.com/abdu2256)\n- **Location**: Islamabad, Pakistan";
+    } else if (latestQuestion.includes('education') || latestQuestion.includes('degree') || latestQuestion.includes('university') || latestQuestion.includes('college') || latestQuestion.includes('gpa') || latestQuestion.includes('comsats')) {
+      reply = "Abdullah is a **BS Electrical Engineering (Computer Engineering)** graduate from **COMSATS University Islamabad** (Class of 2026). His academic coursework covers Data Structures & Algorithms, Object-Oriented Programming, Computer Networks, Operating Systems, Machine Learning, and Database Management Systems.";
+    } else if (latestQuestion.includes('experience') || latestQuestion.includes('talkpool') || latestQuestion.includes('huawei') || latestQuestion.includes('intern')) {
+      reply = "Abdullah completed an engineering internship as an **RF & Drive Test Intern at TalkPool LCC (Huawei Projects)** (April – June 2026). He performed live 4G/LTE drive tests using TEMS Investigation, analyzed signal quality metrics (RSRP, RSRQ, SINR) with Genex Assistant, and studied GSM, WCDMA, and LTE network architectures.";
+    }
+
+    return res.status(200).json({
+      choices: [{
+        message: {
+          role: 'assistant',
+          content: reply
+        }
+      }]
+    });
   } catch (err) {
-    console.error('Error:', err.message);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Chat endpoint internal error' });
   }
 };

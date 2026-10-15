@@ -1,139 +1,68 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { projects } from '../data/projects';
+import ProjectCard3D from './ProjectCard3D';
+import CaseStudyModal from './CaseStudyModal';
 
 export default function Projects() {
-  const [showAll, setShowAll] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const displayed = showAll ? projects : projects.slice(0, 6);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedCaseStudy, setSelectedCaseStudy] = useState(null);
 
-  useEffect(() => {
-    const checkSize = () => setIsMobile(window.innerWidth <= 768);
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    return () => window.removeEventListener('resize', checkSize);
-  }, []);
+  const categories = ['All', 'AI & LLM', 'Full Stack', 'Systems & Desktop'];
+
+  const filteredProjects = activeCategory === 'All'
+    ? projects
+    : projects.filter(p => p.category.toLowerCase().includes(activeCategory.toLowerCase()));
 
   return (
-    <section id="projects" style={{ padding: isMobile ? '70px 20px' : '100px 40px' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <div style={{ color: '#818cf8', fontSize: '13px', fontWeight: '700', letterSpacing: '2px', marginBottom: '12px' }}>
-            MY WORK
-          </div>
-          <h2 style={{ fontSize: isMobile ? '30px' : '42px', fontWeight: '800', color: 'white', margin: 0 }}>
-            Featured{' '}
-            <span style={{
-              background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-            }}>Projects</span>
-          </h2>
-        </div>
+    <section id="projects" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Section Header */}
+      <div className="flex flex-col items-center text-center mb-12">
+        <span className="text-xs font-mono uppercase tracking-widest text-indigo-400 font-semibold mb-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+          Selected Case Studies
+        </span>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Featured Engineering Projects
+        </h2>
+        <p className="text-zinc-400 text-sm sm:text-base max-w-2xl mt-3">
+          Interactive 3D project cards demonstrating full-stack architecture, offline-first systems, and generative AI pipelines. Click any card to explore the full case study.
+        </p>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '20px'
-        }}>
-          {displayed.map(project => (
-            <div key={project.id} style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: '20px', padding: '28px',
-              transition: 'all 0.3s', cursor: 'pointer',
-              position: 'relative', overflow: 'hidden',
-              boxSizing: 'border-box'
-            }}
-              onMouseEnter={e => {
-                e.currentTarget.style.border = `1px solid ${project.color}40`;
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = `0 20px 40px ${project.color}20`;
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.border = '1px solid rgba(255,255,255,0.07)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
+        {/* Filter Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-8 p-1.5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                activeCategory === cat
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+              }`}
             >
-              {project.featured && (
-                <div style={{
-                  position: 'absolute', top: '16px', right: '16px',
-                  background: `${project.color}20`,
-                  border: `1px solid ${project.color}40`,
-                  borderRadius: '6px', padding: '3px 10px',
-                  color: project.color, fontSize: '11px', fontWeight: '700'
-                }}>FEATURED</div>
-              )}
-
-              <div style={{
-                width: '52px', height: '52px',
-                background: `${project.color}15`,
-                border: `1px solid ${project.color}30`,
-                borderRadius: '14px',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '24px',
-                marginBottom: '16px'
-              }}>{project.emoji}</div>
-
-              <h3 style={{
-                color: 'white', fontSize: '17px',
-                fontWeight: '700', margin: '0 0 10px'
-              }}>{project.title}</h3>
-
-              <p style={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '13px', lineHeight: '1.6',
-                margin: '0 0 20px'
-              }}>{project.description}</p>
-
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '20px' }}>
-                {project.tech.map(t => (
-                  <span key={t} style={{
-                    padding: '4px 10px',
-                    background: `${project.color}10`,
-                    border: `1px solid ${project.color}25`,
-                    borderRadius: '5px',
-                    color: project.color, fontSize: '11px', fontWeight: '600'
-                  }}>{t}</span>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <a href={project.github} target="_blank" rel="noreferrer" style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '8px 16px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px', color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none', fontSize: '13px', fontWeight: '600'
-                }}>⬡ GitHub</a>
-                {project.live && (
-                  <a href={project.live} target="_blank" rel="noreferrer" style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '8px 16px',
-                    background: `${project.color}15`,
-                    border: `1px solid ${project.color}30`,
-                    borderRadius: '8px', color: project.color,
-                    textDecoration: 'none', fontSize: '13px', fontWeight: '600'
-                  }}>↗ Live Demo</a>
-                )}
-              </div>
-            </div>
+              {cat}
+            </button>
           ))}
         </div>
-
-        {!showAll && (
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <button onClick={() => setShowAll(true)} style={{
-              padding: '12px 32px',
-              background: 'rgba(99,102,241,0.1)',
-              border: '1px solid rgba(99,102,241,0.3)',
-              borderRadius: '10px', color: '#818cf8',
-              fontSize: '14px', fontWeight: '600',
-              cursor: 'pointer'
-            }}>Show All Projects ({projects.length})</button>
-          </div>
-        )}
       </div>
+
+      {/* Projects 3D Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {filteredProjects.map((project) => (
+          <ProjectCard3D
+            key={project.id}
+            project={project}
+            onSelectCaseStudy={setSelectedCaseStudy}
+          />
+        ))}
+      </div>
+
+      {/* Detailed Case Study Modal */}
+      {selectedCaseStudy && (
+        <CaseStudyModal
+          project={selectedCaseStudy}
+          onClose={() => setSelectedCaseStudy(null)}
+        />
+      )}
     </section>
   );
 }

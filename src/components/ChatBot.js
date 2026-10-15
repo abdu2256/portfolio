@@ -1,51 +1,55 @@
-import remarkGfm from 'remark-gfm';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useState, useRef, useEffect } from 'react';
+import remarkGfm from 'remark-gfm';
+import { FiMessageSquare, FiX, FiSend, FiCpu } from 'react-icons/fi';
 
-const SYSTEM_CONTEXT = `You are Abdullah Basit's portfolio assistant. Answer questions about Abdullah professionally and concisely.
+const SYSTEM_CONTEXT = `You are Abdullah Basit's portfolio AI assistant. Answer questions about Abdullah professionally and concisely.
 
 About Abdullah:
 - BS Electrical Engineering (Computer Engineering) graduate from COMSATS University Islamabad (2026)
-- Full Stack Developer and AI Engineer based in Islamabad, Pakistan
+- Full Stack Developer and AI Systems Engineer based in Islamabad, Pakistan
 - Contact: khanakabdullah188@gmail.com | +92 331 555 2232
 - LinkedIn: linkedin.com/in/abdullah-khan-ak-4275292a6
 - GitHub: github.com/abdu2256
 - Open to Software Engineering, Full-Stack, and AI Engineering roles
 
-Projects:
-1. AI Interview Coach - Node.js, PostgreSQL, React, Ollama, JWT, Web Speech API, Text-to-Speech
-2. AI Omnichannel Auto-Reply System - Node.js, React, MongoDB, Claude API, GPT-4o, Twilio
-3. RAG PDF Chatbot - Python, LangChain, ChromaDB, Ollama, FastAPI, React
-4. Clinic Management System - Electron.js, Node.js, React, SQLite, JWT
-5. University Management Portal - Node.js, Express, MongoDB, React, JWT (25+ REST endpoints)
-6. TalkPool KPI Dashboard - React, Recharts, Node.js, MongoDB
-7. AI Assistant Chatbot - React, Node.js, MongoDB, Claude API, GPT-4o, WebSocket
-8. Skin Disease Detection (FYP) - Python, TensorFlow, Keras, OpenCV, Deep Learning
+Key Projects:
+1. University Management Portal - Node.js, Express, MongoDB, React, 25+ REST endpoints, RBAC
+2. AI Interview Coach - Node.js, PostgreSQL, React, Ollama local inference, Web Speech API
+3. RAG PDF Chatbot - Python, FastAPI, LangChain, ChromaDB vector store, Ollama
+4. AI Omnichannel Auto-Reply System - Node.js, MongoDB, Claude + GPT-4o arbitration, Twilio, Slack
+5. Hostel & Clinic Management Suite - Electron.js, Node.js, React, SQLite, offline-first
+6. TalkPool LTE KPI Dashboard - React, Recharts, Node.js, MongoDB, LTE drive-test analytics
+7. Skin Disease Detection (FYP) - Python, TensorFlow, Keras, OpenCV deep learning CNN
 
-Skills: MERN Stack, React, Node.js, Python, PostgreSQL, MongoDB, SQLite, LangChain, Ollama, ChromaDB, TensorFlow, JWT, REST APIs, WebSocket, Electron.js
-
+Skills: React, Node.js, Python, Express, FastAPI, PostgreSQL, MongoDB, SQLite, LangChain, Ollama, ChromaDB, TensorFlow, JWT, REST APIs, Electron.js, Tailwind CSS
 Experience: RF & Drive Test Intern at TalkPool LCC (Huawei Projects) - April to June 2026
 
-Always be helpful, professional and encourage visitors to hire or contact Abdullah. When listing projects or multiple items, use simple bullet points instead of markdown tables, since the chat window is narrow.`;
+Always be concise, professional, and highlight his verified architectural contributions.`;
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! 👋 I'm Abdullah's AI assistant. Ask me anything about his skills, projects, or experience!" }
+    {
+      role: 'assistant',
+      content: "Hello! I am Abdullah's AI portfolio assistant. Feel free to ask about his engineering projects, technical stack, or availability!"
+    }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (open) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, open]);
 
-  const sendMessage = async () => {
-    console.log('Sending request to server...');
-    if (!input.trim() || loading) return;
+  const sendMessage = async (textToSend) => {
+    const userText = (textToSend || input).trim();
+    if (!userText || loading) return;
 
-    const userMsg = { role: 'user', content: input };
+    const userMsg = { role: 'user', content: userText };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput('');
@@ -56,260 +60,160 @@ export default function ChatBot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          max_tokens: 300,
+          max_tokens: 350,
           messages: [
             { role: 'system', content: SYSTEM_CONTEXT },
-            ...newMessages.map(m => ({ role: m.role, content: m.content }))
+            ...newMessages.map((m) => ({ role: m.role, content: m.content }))
           ]
         })
       });
 
       const data = await response.json();
-      const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't respond right now!";
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-
+      const reply =
+        data.choices?.[0]?.message?.content ||
+        "I'm here to help! Abdullah is a Full Stack Developer & AI Engineer based in Islamabad. Please reach him at khanakabdullah188@gmail.com.";
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch (err) {
       console.error('Fetch error:', err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting. Please email Abdullah directly at khanakabdullah188@gmail.com!" }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            "I'm operating in offline preview mode right now. Abdullah is a COMSATS graduate (BS EE 2026) specializing in Full-Stack and AI Engineering. Feel free to contact him at khanakabdullah188@gmail.com!"
+        }
+      ]);
     }
     setLoading(false);
   };
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Launcher Trigger */}
       <button
         onClick={() => setOpen(!open)}
-        style={{
-          position: 'fixed', bottom: '30px', right: '30px',
-          width: '60px', height: '60px',
-          background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-          border: 'none', borderRadius: '50%',
-          cursor: 'pointer', zIndex: 2000,
-          boxShadow: '0 8px 25px rgba(99,102,241,0.5)',
-          fontSize: '24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'transform 0.3s'
-        }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        className="fixed bottom-6 right-6 z-40 p-3.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-600/40 border border-indigo-400/30 transition-all duration-300 hover:scale-105 cursor-pointer flex items-center justify-center"
+        aria-label="Toggle AI Assistant"
       >
-        {open ? '✕' : '💬'}
+        {open ? <FiX size={22} /> : <FiMessageSquare size={22} />}
       </button>
-
-      {/* Pulse ring */}
-      {!open && (
-        <div style={{
-          position: 'fixed', bottom: '25px', right: '25px',
-          width: '70px', height: '70px',
-          borderRadius: '50%',
-          border: '2px solid rgba(99,102,241,0.4)',
-          zIndex: 1999,
-          animation: 'pulse-ring 2s infinite'
-        }} />
-      )}
 
       {/* Chat Window */}
       {open && (
-        <div style={{
-          position: 'fixed',
-          bottom: '100px', right: '30px',
-          left: 'auto',
-          width: '360px',
-          maxWidth: 'calc(100vw - 40px)',
-          height: '500px',
-          maxHeight: 'calc(100vh - 140px)',
-          background: '#0f0f1a',
-          border: '1px solid rgba(99,102,241,0.3)',
-          borderRadius: '20px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-          zIndex: 2000,
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-          animation: 'slideUp 0.3s ease'
-        }}>
+        <div className="fixed bottom-20 right-4 sm:right-6 z-50 w-[92vw] sm:w-[380px] h-[520px] max-h-[80vh] rounded-2xl bg-zinc-950 border border-zinc-800 shadow-2xl flex flex-col overflow-hidden animate-slideUp">
           {/* Header */}
-          <div style={{
-            padding: '16px 20px',
-            background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-            display: 'flex', alignItems: 'center', gap: '10px'
-          }}>
-            <div style={{
-              width: '38px', height: '38px',
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: '50%',
-              display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '18px'
-            }}>🤖</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ color: 'white', fontWeight: '700', fontSize: '14px' }}>
-                Abdullah's AI Assistant
+          <div className="p-3.5 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+                <FiCpu size={16} />
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px' }}>
-                🟢 Online — Powered by Groq AI
+              <div>
+                <div className="text-xs font-bold text-white">
+                  Abdullah's AI Assistant
+                </div>
+                <div className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Active Assistant
+                </div>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none', borderRadius: '50%',
-              width: '28px', height: '28px',
-              color: 'white', cursor: 'pointer',
-              fontSize: '14px', display: 'flex',
-              alignItems: 'center', justifyContent: 'center'
-            }}>✕</button>
+            <button
+              onClick={() => setOpen(false)}
+              className="p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <FiX size={16} />
+            </button>
           </div>
 
-          {/* Messages */}
-          <div style={{
-            flex: 1, overflowY: 'auto',
-            padding: '16px', display: 'flex',
-            flexDirection: 'column', gap: '10px'
-          }}>
+          {/* Messages Feed */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs leading-relaxed">
             {messages.map((msg, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                alignItems: 'flex-end', gap: '8px'
-              }}>
+              <div
+                key={i}
+                className={`flex gap-2 items-start ${
+                  msg.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
                 {msg.role === 'assistant' && (
-                  <div style={{
-                    width: '24px', height: '24px',
-                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                    borderRadius: '50%', flexShrink: 0,
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', fontSize: '12px'
-                  }}>🤖</div>
+                  <div className="w-6 h-6 rounded-md bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                    <FiCpu size={12} />
+                  </div>
                 )}
-                <div className="chat-msg" style={{
-                  maxWidth: '78%',
-                  padding: '10px 14px',
-                  borderRadius: msg.role === 'user'
-                    ? '16px 16px 4px 16px'
-                    : '16px 16px 16px 4px',
-                  background: msg.role === 'user'
-                    ? 'linear-gradient(135deg, #6366f1, #a855f7)'
-                    : 'rgba(255,255,255,0.06)',
-                  border: msg.role === 'assistant'
-                    ? '1px solid rgba(255,255,255,0.08)'
-                    : 'none',
-                  color: 'white', fontSize: '13px', lineHeight: '1.5'
-                }}>
-                  {msg.role === 'assistant'
-                    ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                    : msg.content}
+                <div
+                  className={`p-3 rounded-2xl max-w-[82%] ${
+                    msg.role === 'user'
+                      ? 'bg-indigo-600 text-white rounded-tr-sm'
+                      : 'bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-tl-sm'
+                  }`}
+                >
+                  {msg.role === 'assistant' ? (
+                    <div className="prose prose-invert prose-xs max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
 
             {loading && (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-                <div style={{
-                  width: '24px', height: '24px',
-                  background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                  borderRadius: '50%',
-                  display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', fontSize: '12px'
-                }}>🤖</div>
-                <div style={{
-                  padding: '10px 16px',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '16px 16px 16px 4px',
-                  display: 'flex', gap: '4px', alignItems: 'center'
-                }}>
-                  {[0, 1, 2].map(i => (
-                    <div key={i} style={{
-                      width: '6px', height: '6px',
-                      background: '#818cf8', borderRadius: '50%',
-                      animation: `bounce 1.2s ${i * 0.2}s infinite`
-                    }} />
-                  ))}
+              <div className="flex gap-2 items-center text-zinc-400 text-xs">
+                <div className="w-6 h-6 rounded-md bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+                  <FiCpu size={12} />
+                </div>
+                <div className="flex gap-1 items-center bg-zinc-900 p-2 rounded-xl border border-zinc-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]" />
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Questions */}
-          {messages.length === 1 && (
-            <div style={{
-              padding: '0 12px 8px',
-              display: 'flex', gap: '6px', flexWrap: 'wrap'
-            }}>
+          {/* Quick Prompts */}
+          {messages.length <= 2 && (
+            <div className="px-3 pb-2 flex flex-wrap gap-1.5">
               {[
-                '🚀 His projects?',
-                '💼 Available for hire?',
-                '🛠️ Tech skills?',
-                '📧 Contact info?'
-              ].map(q => (
-                <button key={q} onClick={() => {
-                  setInput(q.split(' ').slice(1).join(' '));
-                }} style={{
-                  padding: '5px 10px',
-                  background: 'rgba(99,102,241,0.1)',
-                  border: '1px solid rgba(99,102,241,0.3)',
-                  borderRadius: '20px', color: '#818cf8',
-                  fontSize: '11px', cursor: 'pointer',
-                  fontFamily: 'inherit'
-                }}>{q}</button>
+                'Key Projects & Architecture?',
+                'Are you open for hire?',
+                'Tech stack summary?'
+              ].map((query) => (
+                <button
+                  key={query}
+                  onClick={() => sendMessage(query)}
+                  className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  {query}
+                </button>
               ))}
             </div>
           )}
 
-          {/* Input */}
-          <div style={{
-            padding: '12px 16px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex', gap: '8px'
-          }}>
+          {/* Input Row */}
+          <div className="p-3 bg-zinc-900 border-t border-zinc-800 flex gap-2">
             <input
+              type="text"
               value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              placeholder="Ask about Abdullah..."
-              style={{
-                flex: 1, padding: '10px 14px',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '10px', color: 'white',
-                fontSize: '13px', outline: 'none',
-                fontFamily: 'inherit'
-              }}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Ask about Abdullah's skills..."
+              className="flex-1 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 focus:border-indigo-500 text-xs text-white outline-none"
             />
-            <button onClick={sendMessage} disabled={loading} style={{
-              padding: '10px 16px',
-              background: loading
-                ? 'rgba(99,102,241,0.3)'
-                : 'linear-gradient(135deg, #6366f1, #a855f7)',
-              border: 'none', borderRadius: '10px',
-              color: 'white', cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '16px', transition: 'all 0.2s'
-            }}>→</button>
+            <button
+              onClick={() => sendMessage()}
+              disabled={loading || !input.trim()}
+              className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white transition-colors cursor-pointer"
+              aria-label="Send message"
+            >
+              <FiSend size={14} />
+            </button>
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes pulse-ring {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(1.4); opacity: 0; }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
-        .chat-msg p { margin: 0 0 8px; }
-        .chat-msg p:last-child { margin-bottom: 0; }
-        .chat-msg strong { color: white; }
-        .chat-msg ul, .chat-msg ol { padding-left: 18px; margin: 4px 0; }
-        .chat-msg table { border-collapse: collapse; width: 100%; font-size: 12px; margin: 6px 0; }
-        .chat-msg td, .chat-msg th { border: 1px solid rgba(255,255,255,0.1); padding: 4px 6px; }
-        .chat-msg code { background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 4px; }
-      `}</style>
     </>
   );
 }

@@ -1,0 +1,8 @@
+{
+  "name": "Abdullah Basit - Portfolio",
+  "description": "Portfolio of Abdullah Basit, Full Stack Developer and AI Engineer specializing in modern web applications and AI systems.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
